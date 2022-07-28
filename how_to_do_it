@@ -1,0 +1,115 @@
+1. python manage.py runserver
+2. python manage.py startapp ______(name app)
+3.Регистрация приложения
+    django_course_site -> settings.py
+    INSTALLED_APPS.append('news.apps.NewsConfig')
+4. Контроллер (views.py в приложении news), что должно возвращаться
+
+    from django.http import HttpResponse
+
+    def index(request):
+        # print(request)
+        return HttpResponse('Hello world')
+
+    def test(request):
+        # print(request)
+        return HttpResponse('<h1>Test page</h1>')
+
+5. Пути приложения.
+    5.1 В основном urls.py
+
+    from django.urls import path, include
+
+    urlpatterns = [
+        path('admin/', admin.site.urls),
+        path('', include('news.urls')),
+    ]
+
+    # Пути для отладочного сервера
+    if settings.DEBUG:
+        urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    5.2 в settings.py пути для отладочного сервера
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_URL = '/media/'
+
+6. в приложении news создадим собственный urls.py (что бы при переносе не настраивать новые пути)
+
+    from django.urls import path
+    from .views import index, test
+
+    urlpatterns = [
+        path('', index),
+        path('test/', test),
+    ]
+
+7. в приложении news файл models.py создадим новую модель (таблица для базы данных)
+    from django.db import models
+
+
+    class News(models.Model):
+        title = models.CharField(max_length=150)
+        content = models.TextField(blank=True)
+        created_at = models.DateTimeField(auto_now_add=True) # рег.даты создания
+        updated_at = models.DateTimeField(auto_now=True) # рег.даты изменения
+        photo = models.ImageField(upload_to='photos/%Y/%m/%d/') # параметр показывает куда сохранять
+        is_published = models.BooleanField(default=True)
+
+8. Обязательно в проект установить pillow
+9. python manage.py makemigrations отвечает за создание новых миграций на основе изменений, которые вы внесли в свои модели.
+9.1. python manage.py sqlmigrate покажет sql код создания таблицы
+9.2. python manage.py migrate применит миграции модели
+
+10. Работа с моделью из терминала
+
+    (venv) C:\python\django_course_site>python manage.py shell
+    Python 3.7.6 (tags/v3.7.6:43364a7ae0, Dec 19 2019, 00:42:30) [MSC v.1916 64 bit (AMD64)] on win32
+    Type "help", "copyright", "credits" or "license" for more information.
+    (InteractiveConsole)
+    >>> from news.models import News
+    >>> News(title = 'News 1', content = 'Content for news1')
+    <News: News object (None)>
+    >>> n = _
+    >>> n.title
+    'News 1'
+    >>> n.save()
+    >>> n.id
+    1
+    >>> from django.db import connection
+    >>> connection.queries
+    [{'sql': 'INSERT INTO "news_news" ("title", "content", "created_at", "updated_at", "photo", "is
+    _published") VALUES (\'News 1\', \'Content for news1\', \'2022-07-28 18:47:07.424993\', \'2022-
+    07-28 18:47:07.426000\', \'\', 1)', 'time': '0.015'}]
+    >>> n.pk
+    1
+    >>> n2 = News(title = 'News 21', content = 'Content for new21').save()
+    >>> n4 = News.objects.create(title = 'N4', content = 'content4')
+
+11. Получение данных
+    >>> News.objects.all()
+    Если в models.py к классу прописать __str__ (то будет понятнее)
+
+    >>> News.objects.all()
+    <QuerySet [<News: News object (1)>, <News: News object (2)>, <News: News object (3)>]>
+    >>> n = _
+    >>> for i in n:
+    ...     print(i.title, i.is_published)
+    ...
+    News 1 True
+    News 21 True
+    N4 True
+    >>> News.objects.filter(title = 'N4')
+    <QuerySet [<News: News object (3)>]>
+    >>> News.objects.get(pk=3)
+    <News: News object (3)> (возвращает единственное значение)
+    (кинет исключенние если >1 начения или его нет)
+    >>> get_n =_
+    >>> get_n.title = 'Izm news'
+    >>> get_n.save()
+    >>> del_ = News.objects.get(pk=2).delete() #удаление =
+    >>> News.objects.order_by('title') #сортировака
+    <QuerySet [<News: News object (3)>, <News: News object (1)>]>
+    >>> News.objects.exclude(title = 'News 1') #вывод кроме
+
+
+

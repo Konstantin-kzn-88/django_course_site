@@ -8,3 +8,6 @@ class News(models.Model):
     updated_at = models.DateTimeField(auto_now=True) # рег.даты изменения
     photo = models.ImageField(upload_to='photos/%Y/%m/%d/') # параметр показывает куда сохранять
     is_published = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
