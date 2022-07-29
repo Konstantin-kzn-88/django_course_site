@@ -111,5 +111,93 @@
     <QuerySet [<News: News object (3)>, <News: News object (1)>]>
     >>> News.objects.exclude(title = 'News 1') #вывод кроме
 
+12. Шаблоны
+12.1 views.py приложения news
+
+    from django.shortcuts import render
+
+    from .models import News
+
+    def index(request):
+        news = News.objects.order_by('-created_at')
+        return render(request,
+                      template_name='news/index.html',
+                      context={'news': news,'title': 'Список новостей'})
+
+12.2 в папке приложения news создается 2 подкаталога
+        templates -> news (по имени приложения, что бы при объекдинении не было конфликта с другими)
+
+12.3. в templates -> news создаем index.html (по имени функции п.2.1)
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{{ title }}</title>
+    </head>
+    <body>
+
+    <h1> {{ title }}</h1>
+
+    {% for i in news %}
+        <div>
+            <p>{{ i.title }}</p>
+            <p>{{ i.content }}</p>
+            <p>{{ i.created_at|date:"Y-m-d H:i" }}</p>
+        </div>
+        <hr>
+    {% endfor %}
+
+    </body>
+    </html>
+
+13. Админка
+13.1 Регистрация супер пользователя
+    (venv) C:\python\django_course_site>python manage.py createsuperuser
+    Имя пользователя (leave blank to use 'konstantin'): admin
+    Адрес электронной почты: kuznetsovkm@yandex.ru
+    Password:
+    Password (again):
+13.2 Регистрация модели. В admin.py (приложения news)
+    + настройка полей и ссылок + поиск
+
+    from django.contrib import admin
+    from .models import News
+
+    class NewsAdmin(admin.ModelAdmin):
+        list_display = ('id','title','created_at', 'updated_at', 'is_published')
+        list_display_links = ('id','title')
+        search_fields = ('title', 'content')
+
+    admin.site.register(News, NewsAdmin)
 
 
+13.3. Добавить мета подкласс в models.py приложения
+для сортировки и оттображения ед.и множественно числа
++ русификация наименований
+
+    from django.db import models
+    class News(models.Model):
+        title = models.CharField(max_length=150, verbose_name='Заголовок')
+        content = models.TextField(blank=True, verbose_name='Контент')
+        created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата публикации') # рег.даты создания
+        updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата изменения') # рег.даты изменения
+        photo = models.ImageField(upload_to='photos/%Y/%m/%d/', verbose_name='Фото') # параметр показывает куда сохранять
+        is_published = models.BooleanField(default=True, verbose_name='Опубликовано?')
+
+        def __str__(self):
+            return self.title
+
+        class Meta:
+            verbose_name = 'Новость'
+            verbose_name_plural = 'Новости'
+            ordering = ['-created_at', '-title']
+
+13.4. В apps.py приложения для отображения приложения в админке
+    from django.apps import AppConfig
+    class NewsConfig(AppConfig):
+        default_auto_field = 'django.db.models.BigAutoField'
+        name = 'news'
+        verbose_name = 'Новости'
+
+13.5 Сделать миграцию
