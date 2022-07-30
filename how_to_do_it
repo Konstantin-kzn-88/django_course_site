@@ -261,3 +261,6 @@
     admin.site.register(News, NewsAdmin)
     admin.site.register(Category, CategoryAdmin)
 
+15. Внешний вид шаблона bootstrap
+заменим наш index.html на
+https://getbootstrap.com/docs/4.6/getting-started/introduction/#starter-template
