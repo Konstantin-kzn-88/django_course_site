@@ -264,6 +264,7 @@
 15. Внешний вид шаблона bootstrap
 заменим наш index.html на
 https://getbootstrap.com/docs/4.6/getting-started/introduction/#starter-template
++ вывод картинки из базы данных
 
     <!doctype html>
     <html lang="en">
@@ -303,12 +304,21 @@ https://getbootstrap.com/docs/4.6/getting-started/introduction/#starter-template
                             Категория: {{ item.category }}
                         </div>
                         <div class="card-body">
-                            <h5 class="card-title">{{ item.title }}</h5>
-                            <p class="card-text">{{ item.content }}</p>
-                            <a href="#" class="btn btn-primary">Читать далее...</a>
+                            <div class="media">
+                                {% if item.photo %}
+                                    <img src="{{ item.photo.url }}" alt="" width="200" class="mr-3">
+                                {% else %}
+                                    <img src="https://picsum.photos/200/300?grayscale" alt="" class="mr-3">
+                                {% endif %}
+                                <div class="media-body">
+                                    <h5 class="card-title">{{ item.title }}</h5>
+                                    <p class="card-text">{{ item.content }}</p>
+                                    <a href="#" class="btn btn-primary">Читать далее...</a>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-footer text-muted">
-                            {{ item.created_at }}
+                            {{ item.created_at|date }}
                         </div>
                     </div>
                 {% endfor %}
@@ -327,3 +337,26 @@ https://getbootstrap.com/docs/4.6/getting-started/introduction/#starter-template
 
     </body>
     </html>
+
+
+16. Директивы, теги и фильтры
+https://django.fun/docs/django/ru/3.1/ref/templates/builtins/
+
+17. Параметры в URL-запросах
+17.1. views.py
+    from django.shortcuts import render
+
+    from .models import News, Category
+
+
+    def index(request):
+        news = News.objects.order_by('-created_at')
+        categories = Category.objects.all()
+        context = {'news': news,
+                   'title': 'Список новостей',
+                   'category': categories}
+        return render(request,
+                      template_name='news/index.html',
+                      context=context)
+
+17.2. index.html
