@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block title %}
+    {{ item.title }} :: {{ block.super }}
+{% endblock %}
+
 {% block sidebar %}
     {% include 'inc/_sidebar.html' %}
 {% endblock %}
@@ -7,10 +11,10 @@
 
 {% block content %}
 
-    {% for item in news %}
+
         <div class="card mb-3">
             <div class="card-header">
-                Категория: {{ item.category }}
+                Категория: <a href="{{ item.category.get_absolute_url }}">{{ item.category }}</a>
             </div>
             <div class="card-body">
                 <div class="media">
@@ -21,8 +25,8 @@
                     {% endif %}
                     <div class="media-body">
                         <h5 class="card-title">{{ item.title }}</h5>
-                        <p class="card-text ">{{ item.content }}</p>
-                        <a href="{{ item.get_absolute_url }}" class="btn btn-primary">Читать далее...</a>
+                        <p class="card-text ">{{ item.content|safe|linebreaks }}</p>
+                        <a href="#" class="btn btn-primary">Читать далее...</a>
                     </div>
                 </div>
             </div>
@@ -30,6 +34,7 @@
                 {{ item.created_at|date }}
             </div>
         </div>
-    {% endfor %}
+
 {% endblock %}
+
 
