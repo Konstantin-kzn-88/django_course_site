@@ -4,6 +4,7 @@ from django.urls import reverse
 
 class News(models.Model):
     title = models.CharField(max_length=150, verbose_name='Заголовок')
+
     content = models.TextField(blank=True, verbose_name='Контент')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата публикации')  # рег.даты создания
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')  # рег.даты изменения
