@@ -1,8 +1,25 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import ListView
 from .forms import NewsForm
 from .models import News, Category
 
+
+class HomeNews(ListView):
+    model = News
+    template_name = 'news/home_news_list.html' # собственный шаблон
+    context_object_name = 'news' # собственный объект итерирования для рендеринга
+    extra_context = {'title': 'Главная'}
+
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Главная страница'
+        return context
+    
+    # Собственные запрос  только опубликованных новаостей
+    def get_queryset(self):
+        return  News.objects.filter(is_published=True)
 
 def index(request):
     news = News.objects.order_by('-created_at')
